@@ -2,12 +2,6 @@ import socket
 import threading
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print('socket builded, please input the addr of service.')
-service_addr = input()
-if (service_addr == ''):
-    service_addr = '127.0.0.1'
-s.connect((service_addr, 2048))
-print('Link Start.\nType \'exit\' to leave')
 
 
 def send_fun():
@@ -30,7 +24,18 @@ def receiver_fun():
         print(bufff.decode('utf-8'))
 
 
-sender = threading.Thread(target=send_fun)
-receiver = threading.Thread(target=receiver_fun, daemon=True)
-sender.start()
-receiver.start()
+def main():
+    print('socket builded, please input the addr of service.')
+    service_addr = input()
+    if (service_addr == ''):
+        service_addr = '127.0.0.1'
+    s.connect((service_addr, 2048))
+    print('Link Start.\nType \'exit\' to leave')
+    sender = threading.Thread(target=send_fun)
+    receiver = threading.Thread(target=receiver_fun, daemon=True)
+    sender.start()
+    receiver.start()
+
+
+if __name__ == '__main__':
+    main()

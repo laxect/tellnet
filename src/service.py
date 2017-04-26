@@ -6,10 +6,6 @@ message_cnt = 0
 buff_size = 1024
 public_buffer = dict()
 buffer_lock = threading.Lock()
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('0.0.0.0', 2048))
-s.listen(20)
-print('wait for ......')
 
 
 def recv_fun(sock, num):
@@ -56,15 +52,24 @@ def tcplink(sock, addr, num):
     global cnt
     cnt += 1
     print('Accept new connection from %s:%s...' % addr)
-    th = threading.Thread(target=recv_fun, args=(sock, num)).start()
-    threading.Thread(target=send_fun, args=(sock, num), daemon=True)
+    th = threading.Thread(target=recv_fun, args=(sock, num))
+    threading.Thread(target=send_fun, args=(sock, num), daemon=True).start()
     th.start()
     th.join()
     cnt -= 1
     print('Connection from %s:%s closed.' % addr)
 
 
-threading.Thread(target=public_control, args=()).start()
-while True:
-    sock, addr = s.accept()
-    threading.Thread(target=tcplink, args=(sock, addr, cnt)).start()
+def main():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(('0.0.0.0', 2048))
+    s.listen(20)
+    print('wait for ......')
+    threading.Thread(target=public_control, args=(), daemon=True).start()
+    while True:
+        sock, addr = s.accept()
+        threading.Thread(target=tcplink, args=(sock, addr, cnt)).start()
+
+
+if __name__ == '__main__':
+    main()
