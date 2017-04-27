@@ -39,6 +39,7 @@ def public_control():
     global message_cnt
     local_clear_cnt = 0
     while True:
+        buffer_lock.acquire()
         if local_clear_cnt not in public_buffer:
             if local_clear_cnt < message_cnt:
                 local_clear_cnt += 1
@@ -46,6 +47,7 @@ def public_control():
             if public_buffer[local_clear_cnt][1] == 0:
                 public_buffer.pop(local_clear_cnt)
                 local_clear_cnt += 1
+        buffer_lock.release()
 
 
 def tcplink(sock, addr, num):
