@@ -1,3 +1,4 @@
+#!/bin/python
 import socket
 import threading
 
@@ -8,7 +9,7 @@ def send_fun():
     while True:
         comment = input()
         s.send(comment.encode('utf-8'))
-        if(comment == 'exit'):
+        if(comment == '\\exit'):
             s.close()
             exit()
 
@@ -30,7 +31,7 @@ def main():
     if (service_addr == ''):
         service_addr = '127.0.0.1'
     s.connect((service_addr, 2048))
-    print('Link Start.\nType \'exit\' to leave')
+    print('Link Start.\nType \'\help\' for more information')
     sender = threading.Thread(target=send_fun)
     receiver = threading.Thread(target=receiver_fun, daemon=True)
     sender.start()
