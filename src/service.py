@@ -37,6 +37,10 @@ def recv_fun(sock, client):
     while True:
         data = sock.recv(buff_size)
         if not data or data.decode('utf-8') == '\\exit':
+            message_cnt += 1
+            public_buffer[message_cnt] = message(
+                0, client.num, '\\exit', 1
+            )
             exit()
         buffer_lock.acquire()
         comment = data.decode('utf-8')

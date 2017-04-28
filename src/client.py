@@ -8,7 +8,11 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 def send_fun():
     while True:
         comment = input()
-        s.send(comment.encode('utf-8'))
+        if len(comment) > 1024:
+            print('Error : Too long content to send.\n')
+            continue
+        if comment:
+            s.send(comment.encode('utf-8'))
         if(comment == '\\exit'):
             s.close()
             exit()
