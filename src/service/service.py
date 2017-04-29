@@ -1,6 +1,7 @@
 #!/bin/python
 import socket
 import threading
+import sys
 import __help__
 from message_struct import message
 from user_struct import user_pool
@@ -105,26 +106,39 @@ def public_control():
 
 
 def tcplink(sock, addr, user_id):
+    global lg
     lg.new_log('[U:new user log in] %s:%s ' % addr)
-    th = threading.Thread(target=recv_fun, args=(sock, user_id))
-    threading.Thread(target=send_fun, args=(sock, user_id)).start()
+    th = threading.Thread(target=recv_fun, args=(sock, user_id), daemon=True)
+    threading.Thread(target=send_fun, args=(sock, user_id), daemon=True).start()
     th.start()
     th.join()
     users.user_logout(user_id)
     lg.new_log('[U:user log out] %s:%s ' % addr)
 
 
-def main():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+def link_control():
+    s = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
     s.bind(('0.0.0.0', 2048))
     s.listen(20)
-    print('wait for ......')
-    threading.Thread(target=public_control, args=(), daemon=True).start()
+    # print('wait for ......')
     while True:
         sock, addr = s.accept()
         threading.Thread(
-            target=tcplink, args=(sock, addr, users.user_login())
+           target=tcplink, args=(sock, addr, users.user_login()), daemon=True
         ).start()
+
+
+def main():
+    global lg
+    threading.Thread(target=public_control, args=(), daemon=True).start()
+    threading.Thread(target=link_control, args=(), daemon=True).start()
+    try:
+        while True:
+            comment = input()
+            if comment == 'exit':
+                sys.exit()
+    except SystemExit:
+        del lg
 
 
 if __name__ == '__main__':
