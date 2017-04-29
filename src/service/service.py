@@ -5,6 +5,7 @@ import __help__
 from message_struct import message
 from user_struct import user_pool
 from tunel_struct import tunel_pool
+from log import log
 
 message_cnt = 0
 buff_size = 1024
@@ -12,6 +13,7 @@ public_buffer = dict()
 buffer_lock = threading.Lock()
 tunels = tunel_pool()
 users = user_pool()
+lg = log(log_file_name='log_file')
 
 
 def command_fun(comment, user_id):
@@ -103,13 +105,13 @@ def public_control():
 
 
 def tcplink(sock, addr, user_id):
-    print('Accept new connection from %s:%s...' % addr)
+    lg.new_log('[U:new user log in] %s:%s ' % addr)
     th = threading.Thread(target=recv_fun, args=(sock, user_id))
     threading.Thread(target=send_fun, args=(sock, user_id)).start()
     th.start()
     th.join()
     users.user_logout(user_id)
-    print('Connection from %s:%s closed.' % addr)
+    lg.new_log('[U:user log out] %s:%s ' % addr)
 
 
 def main():

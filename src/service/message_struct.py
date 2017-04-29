@@ -4,3 +4,7 @@ class message:
         self.re = re
         self.comment = comment
         self.cnt = cnt
+
+
+def message_cov(str_in):
+    pass
