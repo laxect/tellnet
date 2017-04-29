@@ -24,7 +24,7 @@ def command_fun(comment, user_id):
     if comment == '\\help':
         return 'Admin :\n'+__help__.str_help
     elif comment == '\\tn':
-        return 'Admin : you are now in ' + tunels.pool[this_user.tunel].name[1:]
+        return 'Admin : you are now in ' + tunels.pool[this_user.tunel].name
     elif comment[0:9] == '\\chtnname':
         if tunels.chname_tn(this_user.tunel, comment[10:]):
             return(
@@ -36,7 +36,7 @@ def command_fun(comment, user_id):
         tunel_to = comment[6:]
         tunels.join_tn('t'+tunel_to)
         users.user_chtn(user_id, 't'+tunel_to)
-        return 'Admin : you are now in ' + tunels.pool[this_user.tunel].name[1:]
+        return 'Admin : you are now in ' + tunels.pool[this_user.tunel].name
     elif comment[0:7] == '\\chname':
         users.user_chname(user_id, comment[8:])
         return 'Admin : your name change to ' + this_user.name
