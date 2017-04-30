@@ -90,3 +90,4 @@ ENV/
 
 # test files
 .log
+my_config.py
