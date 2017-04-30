@@ -11,7 +11,7 @@ class user:
 class user_pool:
     def __init__(self):
         self.pool = {}
-        self.pool['0'] = user(num=0, tunel='t0', name='Admin')
+        self.pool[0] = user(num=0, tunel='t0', name='Admin')
         self.user_cnt = 0
         self.cnt = 1
 

@@ -1,6 +1,9 @@
 #!/bin/python
+import time
 import socket
+import config
 import threading
+from message_pack import message
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -8,33 +11,36 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 def send_fun():
     while True:
         comment = input()
-        if len(comment) > 1024:
+        if len(comment) > 500:
             print('Error : Too long content to send.\n')
             continue
         if comment:
-            s.send(comment.encode('utf-8'))
+            me = message(None, None, comment, time.ctime(), config.user_agent)
+            s.send(me.package().encode('utf-8'))
         if(comment == '\\exit'):
             s.close()
             exit()
 
 
 def receiver_fun():
-    buff = []
+    me = message()
     while True:
         bufff = s.recv(1024)
         if bufff:
-            buff.append(bufff)
+            me.unpackage(bufff.decode('utf-8'))
         else:
             break
-        print(bufff.decode('utf-8'))
+        print(
+            me['recv_from_name'], ' @ ', me['timestamp'], ' :\n', me.content())
+        # print(bufff.decode('utf-8'))
 
 
 def main():
-    print('socket builded, please input the addr of service.')
-    service_addr = input()
-    if (service_addr == ''):
-        service_addr = '127.0.0.1'
-    s.connect((service_addr, 2048))
+    # print('socket builded, please input the addr of service.')
+    # service_addr = input()
+    # if (service_addr == ''):
+    #    service_addr = '127.0.0.1'
+    s.connect((config.service_addr, config.service_port))
     print('Link Start.\nType \'\help\' for more information')
     sender = threading.Thread(target=send_fun)
     receiver = threading.Thread(target=receiver_fun, daemon=True)
