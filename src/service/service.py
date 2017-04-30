@@ -7,6 +7,8 @@ from message_struct import message
 from user_struct import user_pool
 from tunel_struct import tunel_pool
 from log import log
+import .
+
 
 message_cnt = 0
 buff_size = 1024
