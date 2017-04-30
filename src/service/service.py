@@ -62,15 +62,14 @@ def recv_fun(sock, user_id):
         if not data:
             users.user_logout(user_id)
             exit()
-        me.unpackage(data.decode('utf-8'))
+        if not me.unpackage(data.decode('utf-8')) or me.content() == '\\exit':
+            users.user_logout(user_id)
+            exit()
         # to prevent user cheat
         me['recv_from'] = this_user.num
         me['send_to'] = this_user.tunel
         me['recv_from_name'] = this_user.name
         # end of above
-        if me.content() == '\\exit':
-            users.user_logout(user_id)
-            exit()
         buffer_lock.acquire()
         # comment = data.decode('utf-8')
         if me.content()[0] == '\\':
