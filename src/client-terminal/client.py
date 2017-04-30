@@ -3,7 +3,7 @@ import time
 import socket
 try:
     import my_config as config
-except:
+except ImportError:
     import config
 
 import threading
