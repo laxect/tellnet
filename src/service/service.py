@@ -8,7 +8,6 @@ import threading
 import log
 import __help__
 from message_pack import message
-# from message_struct import message
 from user_struct import user_pool
 from tunel_struct import tunel_pool
 import config
@@ -75,7 +74,6 @@ def recv_fun(sock, user_id):
         me['recv_from_name'] = this_user.name
         # end of above
         buffer_lock.acquire()
-        # comment = data.decode('utf-8')
         if me.content()[0] == '\\':
             message_cnt += 1
             public_buffer[message_cnt] = [
@@ -124,7 +122,6 @@ def public_control():
 
 @lg.log_thread()
 def tcplink(sock, addr, user_id, lg=lg):
-    # global lg
     lg.new_log('[U:new user log in] %s:%s ' % addr)
     th_r = threading.Thread(target=recv_fun, args=(sock, user_id), daemon=True)
     th_s = threading.Thread(target=send_fun, args=(sock, user_id), daemon=True)
@@ -137,11 +134,8 @@ def tcplink(sock, addr, user_id, lg=lg):
 
 @lg.log_thread()
 def link_control(s):
-    # global lg
-    # lg.new_log('[Th : thread create]\n%s' % threading.currentThread())
     s.bind(('0.0.0.0', config.service_port))
     s.listen(20)
-    # print('wait for ......')
     while True:
         sock, addr = s.accept()
         threading.Thread(
