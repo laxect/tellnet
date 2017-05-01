@@ -1,30 +1,33 @@
 #!/bin/python
+# sys module
 import sys
 import time
 import socket
 import threading
+# my module
+import log
 import __help__
-from log import log
 from message_pack import message
 # from message_struct import message
 from user_struct import user_pool
 from tunel_struct import tunel_pool
-from config import buff_size, service_port, service_agent
+import config
 
 
 message_cnt = 0
+users = user_pool()
+tunels = tunel_pool()
 public_buffer = dict()
 buffer_lock = threading.Lock()
-tunels = tunel_pool()
-users = user_pool()
-lg = log(log_file_name='log_file')
+lg = log.log(log_file_name='log_file')
 
 
 def command_fun(comment, user_id):
     re = ''
     if not users.user_con(user_id):
         re = 'Error : No such user or admin.'
-        return message(0, user_id, re, time.ctime(), service_agent, 'Admin')
+        return message(
+            0, user_id, re, time.ctime(), config.service_agent, 'Admin')
     this_user = users.pool[user_id]
     if comment == '\\help':
         re = __help__.str_help
@@ -50,15 +53,16 @@ def command_fun(comment, user_id):
             'there is no command like ' +
             comment+'\n' +
             'type \\help for more information')
-    return message(0, user_id, re, time.ctime(), service_agent, 'Admin')
+    return message(0, user_id, re, time.ctime(), config.service_agent, 'Admin')
 
 
+@lg.log_thread()
 def recv_fun(sock, user_id):
     global message_cnt
     while users.user_con(user_id):
         this_user = users.pool[user_id]
         me = message()
-        data = sock.recv(buff_size)
+        data = sock.recv(config.buff_size)
         if not data:
             users.user_logout(user_id)
             exit()
@@ -82,6 +86,7 @@ def recv_fun(sock, user_id):
         buffer_lock.release()
 
 
+@lg.log_thread()
 def send_fun(sock, user_id):
     global messgae_cnt
     local_message_cnt = message_cnt
@@ -101,6 +106,7 @@ def send_fun(sock, user_id):
         buffer_lock.release()
 
 
+@lg.log_thread()
 def public_control():
     global message_cnt
     local_clear_cnt = 0
@@ -116,19 +122,24 @@ def public_control():
         buffer_lock.release()
 
 
-def tcplink(sock, addr, user_id):
-    global lg
+@lg.log_thread()
+def tcplink(sock, addr, user_id, lg=lg):
+    # global lg
     lg.new_log('[U:new user log in] %s:%s ' % addr)
-    th = threading.Thread(target=recv_fun, args=(sock, user_id), daemon=True)
-    threading.Thread(target=send_fun, args=(sock, user_id), daemon=True).start()
-    th.start()
-    th.join()
+    th_r = threading.Thread(target=recv_fun, args=(sock, user_id), daemon=True)
+    th_s = threading.Thread(target=send_fun, args=(sock, user_id), daemon=True)
+    th_s.start()
+    th_r.start()
+    th_r.join()
     users.user_logout(user_id)
     lg.new_log('[U:user log out] %s:%s ' % addr)
 
 
+@lg.log_thread()
 def link_control(s):
-    s.bind(('0.0.0.0', service_port))
+    # global lg
+    # lg.new_log('[Th : thread create]\n%s' % threading.currentThread())
+    s.bind(('0.0.0.0', config.service_port))
     s.listen(20)
     # print('wait for ......')
     while True:
@@ -143,14 +154,13 @@ def main():
     s = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
     threading.Thread(target=public_control, args=(), daemon=True).start()
     threading.Thread(target=link_control, args=(s, ), daemon=True).start()
-    try:
-        while True:
-            comment = input()
-            if comment == 'exit':
-                sys.exit()
-    except SystemExit:
-        del lg
-        s.close()
+    while True:
+        comment = input()
+        if comment == 'exit':
+            break
+    del lg
+    s.close()
+    sys.exit()
 
 
 if __name__ == '__main__':
