@@ -127,8 +127,7 @@ def tcplink(sock, addr, user_id):
     lg.new_log('[U:user log out] %s:%s ' % addr)
 
 
-def link_control():
-    s = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
+def link_control(s):
     s.bind(('0.0.0.0', service_port))
     s.listen(20)
     # print('wait for ......')
@@ -141,8 +140,9 @@ def link_control():
 
 def main():
     global lg
+    s = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
     threading.Thread(target=public_control, args=(), daemon=True).start()
-    threading.Thread(target=link_control, args=(), daemon=True).start()
+    threading.Thread(target=link_control, args=(s, ), daemon=True).start()
     try:
         while True:
             comment = input()
@@ -150,6 +150,7 @@ def main():
                 sys.exit()
     except SystemExit:
         del lg
+        s.close()
 
 
 if __name__ == '__main__':

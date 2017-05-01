@@ -29,7 +29,7 @@ class message(dict):
     def unpackage(self, comment):
         try:
             me = json.loads(comment)
-        except TypeError:
+        except json.JSONDecodeError:
             return False
         try:
             self['recv_from'] = me.get('recv_from')
