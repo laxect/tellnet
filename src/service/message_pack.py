@@ -27,7 +27,10 @@ class message(dict):
         return json.dumps(self)
 
     def unpackage(self, comment):
-        me = json.loads(comment)
+        try:
+            me = json.loads(comment)
+        except json.JSONDecodeError:
+            return False
         try:
             self['recv_from'] = me.get('recv_from')
             self['send_to'] = me.get('send_to')

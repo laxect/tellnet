@@ -1,7 +1,11 @@
 #!/bin/python
 import time
 import socket
-import config
+try:
+    import my_config as config
+except ImportError:
+    import config
+
 import threading
 from message_pack import message
 
