@@ -92,5 +92,6 @@ ENV/
 .log
 my_config.py
 _my_config.py
+my_config_service.py
 tmp
 message_pack/

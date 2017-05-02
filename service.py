@@ -10,7 +10,10 @@ import __help__
 from message_pack.message_pack import message
 from user_struct import user_pool
 from tunel_struct import tunel_pool
-import config
+try:
+    import my_config_service as config
+except ImportError:
+    import config
 
 
 message_cnt = 0
@@ -152,9 +155,10 @@ def main():
     threading.Thread(target=public_control, args=(), daemon=True).start()
     threading.Thread(target=link_control, args=(s, ), daemon=True).start()
     while True:
-        comment = input()
-        if comment == 'exit':
-            break
+        if config.state == 'debug':
+            comment = input()
+            if comment == 'exit':
+                break
     del lg
     s.close()
     sys.exit()
