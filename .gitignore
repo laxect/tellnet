@@ -91,5 +91,6 @@ ENV/
 # test files
 .log
 my_config.py
+_my_config.py
 tmp
 message_pack/

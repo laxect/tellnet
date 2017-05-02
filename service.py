@@ -52,7 +52,10 @@ def command_fun(comment, user_id):
             'there is no command like ' +
             comment+'\n' +
             'type \\help for more information')
-    return message(0, user_id, re, time.ctime(), config.service_agent, 'Admin')
+    return message(
+        recv_from=0, send_to=user_id, content=re,
+        timestamp=time.ctime(), user_agent=config.service_agent,
+        memetype='Text', recv_from_name='Admin')
 
 
 @lg.log_thread()
@@ -74,7 +77,7 @@ def recv_fun(sock, user_id):
         me['recv_from_name'] = this_user.name
         # end of above
         buffer_lock.acquire()
-        if me.content()[0] == '\\':
+        if me['memetype'] == 'command':
             message_cnt += 1
             public_buffer[message_cnt] = [
                 command_fun(me.content(), this_user.num), users.user_cnt]
@@ -94,13 +97,13 @@ def send_fun(sock, user_id):
         if (local_message_cnt < message_cnt):
             local_message_cnt += 1
             me = public_buffer[local_message_cnt][0]
+            public_buffer[local_message_cnt][1] -= 1
             if (me.recv_from() != user_id and (
                     me.send_to() == this_user.tunel
                     or me.send_to() == user_id)):
                 sock.send(
                     me.package().encode('utf-8')
                     )
-                public_buffer[local_message_cnt][1] -= 1
         buffer_lock.release()
 
 
