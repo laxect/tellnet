@@ -7,7 +7,7 @@ except ImportError:
     import config
 
 import threading
-from message_pack import message
+from message_pack import message, message_pack
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -15,12 +15,13 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 def send_fun():
     while True:
         comment = input()
-        if len(comment) > 500:
-            print('Error : Too long content to send.\n')
-            continue
         if comment:
-            me = message(None, None, comment, time.ctime(), config.user_agent)
-            s.send(me.package().encode('utf-8'))
+            mp = message_pack(
+                recv_from=None, send_to=None, content=comment,
+                timestamp=time.ctime(), user_agent=config.user_agent,
+                memetype='Text')
+            for me in mp:
+                s.send(me.package().encode('utf-8'))
         if(comment == '\\exit'):
             s.close()
             exit()
@@ -28,12 +29,19 @@ def send_fun():
 
 def receiver_fun():
     me = message()
+    tmp = message()
     while True:
-        bufff = s.recv(1024)
-        if bufff:
-            me.unpackage(bufff.decode('utf-8'))
+        bufff = s.recv(10240)
+        tmp.unpackage(bufff.decode('utf-8'))
+        if tmp['pack_num'] == 0:
+            me = tmp
+        elif tmp['pack_num'] == 1:
+            me = tmp
+            continue
         else:
-            break
+            me.content_join(tmp['content'])
+            if tmp['pack_num'] > 1:
+                continue
         print(
             me['recv_from_name'], ' @ ', me['timestamp'], ' :\n', me.content())
         # print(bufff.decode('utf-8'))
