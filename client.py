@@ -4,10 +4,10 @@ import socket
 try:
     import my_config as config
 except ImportError:
-    import config
+    import cli-config as config
 
 import threading
-from message_pack import message, message_pack
+from message_pack.message_pack import message, message_pack
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 

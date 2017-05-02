@@ -7,7 +7,7 @@ import threading
 # my module
 import log
 import __help__
-from message_pack import message
+from message_pack.message_pack import message
 from user_struct import user_pool
 from tunel_struct import tunel_pool
 import config
