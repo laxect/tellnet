@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/python3
 # sys module
 import sys
 import time
