@@ -5,7 +5,6 @@ import time
 import socket
 import threading
 # my module
-import log
 import __help__
 from message_pack.message_pack import message
 from user_struct import user_pool
@@ -21,7 +20,6 @@ users = user_pool()
 tunels = tunel_pool()
 public_buffer = dict()
 buffer_lock = threading.Lock()
-lg = log.log(log_file_name='log_file')
 
 
 def command_fun(comment, user_id):
@@ -61,7 +59,6 @@ def command_fun(comment, user_id):
         memetype='Text', recv_from_name='Admin')
 
 
-@lg.log_thread()
 def recv_fun(sock, user_id):
     global message_cnt
     while users.user_con(user_id):
@@ -90,7 +87,6 @@ def recv_fun(sock, user_id):
         buffer_lock.release()
 
 
-@lg.log_thread()
 def send_fun(sock, user_id):
     global messgae_cnt
     local_message_cnt = message_cnt
@@ -110,7 +106,6 @@ def send_fun(sock, user_id):
         buffer_lock.release()
 
 
-@lg.log_thread()
 def public_control():
     global message_cnt
     local_clear_cnt = 0
@@ -126,31 +121,26 @@ def public_control():
         buffer_lock.release()
 
 
-@lg.log_thread()
-def tcplink(sock, addr, user_id, lg=lg):
-    lg.new_log('[U:new user log in] %s:%s ' % addr)
+def tcplink(sock, addr, user_id):
     th_r = threading.Thread(target=recv_fun, args=(sock, user_id), daemon=True)
     th_s = threading.Thread(target=send_fun, args=(sock, user_id), daemon=True)
     th_s.start()
     th_r.start()
     th_r.join()
     users.user_logout(user_id)
-    lg.new_log('[U:user log out] %s:%s ' % addr)
 
 
-@lg.log_thread()
 def link_control(s):
     s.bind(('0.0.0.0', config.service_port))
     s.listen(20)
     while True:
         sock, addr = s.accept()
         threading.Thread(
-           target=tcplink, args=(sock, addr, users.user_login()), daemon=True
+           target=tcplink, args=(sock, addr, users.user_in()), daemon=True
         ).start()
 
 
 def main():
-    global lg
     s = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
     threading.Thread(target=public_control, args=(), daemon=True).start()
     threading.Thread(target=link_control, args=(s, ), daemon=True).start()
@@ -159,7 +149,6 @@ def main():
             comment = input()
             if comment == 'exit':
                 break
-    del lg
     s.close()
     sys.exit()
 
