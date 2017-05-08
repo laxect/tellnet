@@ -34,10 +34,19 @@ class user_pool:
             self.pool.pop(user_id)
             self.user_cnt -= 1
 
-    def user_chtn(self, user_id, chtn_to):
-        "change user's tunel to chtn_to"
+    def user_chtn(self, user_id, tn_real_id):
+        self.user_join_tn(user_id, tn_real_id)
+        self.user_leave_tn(user_id, tn_real_id)
+
+    def user_join_tn(self, user_id, tn_real_id):
+        'user join a new tunel'
         if self.user_con(user_id):
-            self.pool[user_id].tunel = chtn_to
+            self.pool[user_id].tunel *= tn_real_id
+
+    def user_leave_tn(self, user_id, tn_real_id):
+        'leave a tunel'
+        if self.user_con(user_id) and not self.pool[user_id].tunel % tn_real_id:
+            self.pool[user_id].tunel //= tn_real_id
 
 
 def main():
